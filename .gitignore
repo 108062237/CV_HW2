@@ -1,0 +1,9 @@
+# .gitignore
+__pycache__/
+*.pth
+*.zip
+output/
+.env
+data/test
+data/train
+data/valid
