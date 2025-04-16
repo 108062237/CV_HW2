@@ -6,14 +6,14 @@ The goal is to detect digits in images (Task 1) and predict the full digit seque
 
 ---
 
-## 📌 Tasks
+## Tasks
 
 - **Task 1**: Detect each digit and output bounding boxes → `pred.json`
 - **Task 2**: Convert detection results into full numbers → `pred.csv`
 
 ---
 
-## 📂 Files
+## Files
 
 - `train.py` – train Faster R-CNN
 - `predict.py` – generate `pred.json`
@@ -23,7 +23,7 @@ The goal is to detect digits in images (Task 1) and predict the full digit seque
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 Train the model:
 ```bash
