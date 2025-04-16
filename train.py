@@ -7,6 +7,7 @@ from torchvision.transforms import ToTensor
 from dataset import DigitDetectionDataset
 from model import get_faster_rcnn_model
 from tqdm import tqdm
+import torchvision.transforms as transforms
 
 def collate_fn(batch):
     return tuple(zip(*batch))
@@ -64,7 +65,9 @@ def main():
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     # === Dataset ===
-    transform = ToTensor()
+    transform = transforms.Compose([
+        transforms.ToTensor()
+    ])
     train_dataset = DigitDetectionDataset(
         json_path=config['path']['train_json'],
         image_dir=config['path']['train_images'],
@@ -86,6 +89,7 @@ def main():
         backbone_name=config['model']['name'],
         pretrained=config['model']['pretrained']
     ).to(device)
+
 
     # === Optimizer & Scheduler ===
     params = [p for p in model.parameters() if p.requires_grad]

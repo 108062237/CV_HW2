@@ -1,11 +1,11 @@
 model:
-  name: resnet101
+  name: resnet50
   num_classes: 11
   pretrained: true
 
 train:
   batch_size: 4
-  epochs: 20
+  epochs: 10
   lr: 0.0001
   weight_decay: 0.0001
   step_size: 5
@@ -16,4 +16,4 @@ path:
   val_json: data/valid.json
   train_images: data/train
   val_images: data/valid
-  save_path: checkpoints/best_model.pth
+  save_path: checkpoints/resnet50_best_model.pth

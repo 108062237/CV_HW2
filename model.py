@@ -2,20 +2,22 @@ import torchvision
 from torchvision.models.detection import FasterRCNN
 from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
 from torchvision.models.detection.rpn import AnchorGenerator
+from torchvision.models.detection.backbone_utils import BackboneWithFPN
+from torchvision.ops.feature_pyramid_network import LastLevelMaxPool
+from torchvision.models.feature_extraction import create_feature_extractor
+from torchvision.ops import MultiScaleRoIAlign
 
 def get_faster_rcnn_model(num_classes=11, backbone_name='resnet50', pretrained=True):
-    """
-    建立 Faster R-CNN 模型。
-    Args:
-        num_classes (int): 類別數 + 1（包含背景，通常背景是 class 0）
-        backbone_name (str): 可選 'resnet50', 'resnet101', 'mobilenet_v2'
-        pretrained (bool): 是否使用預訓練權重
-    """
+    
     
     if backbone_name.startswith("resnet"):
         # 建立帶有 FPN 的 ResNet 骨幹
         backbone = resnet_fpn_backbone(backbone_name, pretrained=pretrained)
         model = FasterRCNN(backbone, num_classes=num_classes)
+
+    elif backbone_name == 'resnext101_32x8d':
+        backbone = resnet_fpn_backbone(backbone_name, pretrained=pretrained)
+        model = FasterRCNN(backbone, num_classes=num_classes)        
     
     elif backbone_name == 'mobilenet_v2':
         # 使用 MobileNetV2 作為骨幹 + FPN
@@ -45,4 +47,37 @@ def get_faster_rcnn_model(num_classes=11, backbone_name='resnet50', pretrained=T
     else:
         raise ValueError(f"Unsupported backbone: {backbone_name}")
     
+    return model
+
+
+def build_fpn_model_from_backbone(backbone_cnn, num_classes):
+    # Feature extractor：抽出要給 FPN 的中間層
+    return_layers = {
+        'layer1': '0',
+        'layer2': '1',
+        'layer3': '2',
+        'layer4': '3',
+    }
+
+    in_channels_list = [256, 512, 1024, 2048]  # 對應每層的 channel 數
+    out_channels = 256                         # FPN 每層輸出的 channel 數
+
+    # 建立 feature extractor
+    feature_extractor = create_feature_extractor(backbone_cnn, return_nodes=return_layers)
+
+    # 正確初始化 BackboneWithFPN
+    backbone_with_fpn = BackboneWithFPN(
+        backbone=feature_extractor,
+        return_layers=return_layers,
+        in_channels_list=in_channels_list,
+        out_channels=out_channels,
+        extra_blocks=LastLevelMaxPool()
+    )
+
+    # 建立 Faster R-CNN 模型
+    model = torchvision.models.detection.FasterRCNN(
+        backbone=backbone_with_fpn,
+        num_classes=num_classes
+    )
+
     return model
